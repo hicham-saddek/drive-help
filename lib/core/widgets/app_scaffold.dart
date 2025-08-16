@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../utils/app_strings.dart';
-import 'package:roadtrip_sidekick/features/dashboard/dashboard_page.dart';
-import 'package:roadtrip_sidekick/features/map/map_page.dart';
+import 'package:roadtrip_sidekick/features/dashboard/dashboard_screen.dart';
+import 'package:roadtrip_sidekick/features/map/map_screen.dart';
 import 'package:roadtrip_sidekick/features/stops/stops_page.dart';
 import 'package:roadtrip_sidekick/features/supplies/supplies_page.dart';
 import 'package:roadtrip_sidekick/features/expenses/expenses_page.dart';
@@ -19,8 +19,8 @@ class _AppScaffoldState extends State<AppScaffold> {
   int _index = 0;
 
   static const _pages = <Widget>[
-    DashboardPage(),
-    MapPage(),
+    DashboardScreen(),
+    MapScreen(),
     StopsPage(),
     SuppliesPage(),
     ExpensesPage(),
