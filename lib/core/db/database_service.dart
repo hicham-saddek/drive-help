@@ -11,13 +11,41 @@ class DatabaseService {
     final path = '${dir.path}/roadtrip_sidekick.db';
     _database = await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
-        // v1 has no tables yet
+        await db.execute('''
+          CREATE TABLE pois(
+            id TEXT PRIMARY KEY,
+            category TEXT,
+            name TEXT,
+            lat REAL,
+            lon REAL,
+            cost_hint TEXT,
+            notes TEXT
+          )
+        ''');
+        await db.execute(
+            'CREATE TABLE settings(id INTEGER PRIMARY KEY, offline_tiles_path TEXT)');
+        await db.insert('settings', {'id': 1, 'offline_tiles_path': null});
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 1) {
-          // initial migration placeholder
+          await db.execute('''
+            CREATE TABLE pois(
+              id TEXT PRIMARY KEY,
+              category TEXT,
+              name TEXT,
+              lat REAL,
+              lon REAL,
+              cost_hint TEXT,
+              notes TEXT
+            )
+          ''');
+        }
+        if (oldVersion < 2) {
+          await db.execute(
+              'CREATE TABLE settings(id INTEGER PRIMARY KEY, offline_tiles_path TEXT)');
+          await db.insert('settings', {'id': 1, 'offline_tiles_path': null});
         }
       },
     );

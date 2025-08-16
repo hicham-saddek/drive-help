@@ -1,0 +1,6 @@
+{
+  "version": 8,
+  "name": "Fallback",
+  "sources": { "empty": { "type": "vector", "tiles": [] } },
+  "layers": [ { "id": "background", "type": "background", "paint": {"background-color": "#111111"} } ]
+}
