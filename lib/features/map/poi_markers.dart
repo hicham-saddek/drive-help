@@ -5,7 +5,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import '../../core/models/poi.dart';
 
 Future<void> renderPoiMarkers(
-  MaplibreMapController controller,
+  MapLibreMapController controller,
   List<Poi> pois,
 ) async {
   await controller.clearSymbols();

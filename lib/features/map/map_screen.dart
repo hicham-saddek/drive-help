@@ -1,13 +1,15 @@
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:path/path.dart' as p;
 
 import '../../core/models/poi.dart';
 import '../../core/providers/providers.dart';
 import '../../core/repositories/settings_repository.dart';
+import '../../core/services/mbtiles_picker.dart';
 import '../poi/poi_list_screen.dart';
 import 'poi_bottom_sheet.dart';
 import 'poi_markers.dart';
@@ -20,8 +22,11 @@ class MapScreen extends ConsumerStatefulWidget {
 }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
-  MaplibreMapController? _controller;
+  MapLibreMapController? _controller;
   String? _offlinePath;
+
+  bool get _mapSupported =>
+      kIsWeb || Platform.isAndroid || Platform.isIOS;
 
   @override
   void initState() {
@@ -36,12 +41,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   Future<void> _pickMbtiles() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
-    if (result != null && result.files.single.path != null) {
-      final path = result.files.single.path!;
-      await ref.read(settingsRepositoryProvider).setOfflineTilesPath(path);
-      setState(() => _offlinePath = path);
-    }
+    final path = await pickAndPersistMbtilesPath();
+    if (path == null) return;
+    await ref.read(settingsRepositoryProvider).setOfflineTilesPath(path);
+    setState(() {
+      _offlinePath = path;
+      _controller = null;
+    });
   }
 
   void _onSymbolTapped(Symbol symbol) async {
@@ -70,11 +76,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_mapSupported) {
+      return const Center(
+        child: Text('Map is not supported on this platform'),
+      );
+    }
+
     final pois = ref.watch(visiblePoisProvider);
+    final hasTiles =
+        _offlinePath != null && File(_offlinePath!).existsSync();
+    if (!hasTiles && _offlinePath != null) {
+      debugPrint('Offline tiles path not readable: $_offlinePath');
+    }
+
     return Stack(
       children: [
         MapLibreMap(
-          styleString: 'asset://assets/style/offline_fallback_style.json',
+          key: ValueKey(hasTiles ? _offlinePath : 'fallback'),
+          styleString: hasTiles
+              ? 'mbtiles://$_offlinePath'
+              : 'asset://assets/style/offline_fallback_style.json',
           initialCameraPosition: const CameraPosition(
             target: LatLng(31.6, -8.0),
             zoom: 4.5,
@@ -130,16 +151,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         }
                       },
                     ),
-                  ),
+                ),
                 TextButton(
                   onPressed: _pickMbtiles,
                   child: const Text('Pick MBTiles'),
                 ),
+                if (hasTiles)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text('Tiles set: ${p.basename(_offlinePath!)}'),
+                  ),
               ],
             ),
           ),
         ),
-        if (_offlinePath == null || !File(_offlinePath!).existsSync())
+        if (!hasTiles)
           Positioned(
             top: 72,
             left: 16,
