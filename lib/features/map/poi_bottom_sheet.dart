@@ -66,8 +66,8 @@ class _PoiBottomSheetState extends ConsumerState<PoiBottomSheet> {
                 TextButton(
                   onPressed: () async {
                     final repo = ref.read(poiRepositoryProvider);
-                    await repo.delete(widget.poi!.id);
-                    if (mounted) Navigator.pop(context, true);
+                      await repo.delete(widget.poi!.id);
+                      if (mounted) Navigator.pop(context, true); // ignore: use_build_context_synchronously
                   },
                   child: const Text('Delete'),
                 ),
@@ -87,12 +87,12 @@ class _PoiBottomSheetState extends ConsumerState<PoiBottomSheet> {
                     costHint: _cost.text.isEmpty ? null : _cost.text,
                     notes: _notes.text.isEmpty ? null : _notes.text,
                   );
-                  if (widget.poi == null) {
-                    await repo.insert(poi);
-                  } else {
-                    await repo.update(poi);
-                  }
-                  if (mounted) Navigator.pop(context, true);
+                    if (widget.poi == null) {
+                      await repo.insert(poi);
+                    } else {
+                      await repo.update(poi);
+                    }
+                    if (mounted) Navigator.pop(context, true); // ignore: use_build_context_synchronously
                 },
                 child: const Text('Save'),
               ),

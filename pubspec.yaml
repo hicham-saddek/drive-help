@@ -43,6 +43,7 @@ dependencies:
   # permission_handler, geolocator and share_plus removed for SDK compatibility
   file_picker: ^8.0.0
   maplibre_gl: ^0.20.0
+  path: any
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +55,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
+  path_provider_platform_interface: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
