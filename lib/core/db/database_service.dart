@@ -24,9 +24,36 @@ class DatabaseService {
             notes TEXT
           )
         ''');
-        await db.execute(
-            'CREATE TABLE settings(id INTEGER PRIMARY KEY, offline_tiles_path TEXT)');
-        await db.insert('settings', {'id': 1, 'offline_tiles_path': null});
+        await db.execute('''
+          CREATE TABLE trips(
+            id TEXT PRIMARY KEY,
+            name TEXT
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE stops(
+            id TEXT PRIMARY KEY,
+            trip_id TEXT,
+            name TEXT,
+            lat REAL,
+            lon REAL,
+            will_sleep INTEGER,
+            notes TEXT,
+            status TEXT
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE settings(
+            id INTEGER PRIMARY KEY,
+            offline_tiles_path TEXT,
+            active_stop_id TEXT
+          )
+        ''');
+        await db.insert('settings', {
+          'id': 1,
+          'offline_tiles_path': null,
+          'active_stop_id': null,
+        });
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 1) {
@@ -43,9 +70,34 @@ class DatabaseService {
           ''');
         }
         if (oldVersion < 2) {
+          await db.execute('''
+            CREATE TABLE trips(
+              id TEXT PRIMARY KEY,
+              name TEXT
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE stops(
+              id TEXT PRIMARY KEY,
+              trip_id TEXT,
+              name TEXT,
+              lat REAL,
+              lon REAL,
+              will_sleep INTEGER,
+              notes TEXT,
+              status TEXT
+            )
+          ''');
           await db.execute(
-              'CREATE TABLE settings(id INTEGER PRIMARY KEY, offline_tiles_path TEXT)');
-          await db.insert('settings', {'id': 1, 'offline_tiles_path': null});
+              'CREATE TABLE settings(id INTEGER PRIMARY KEY, offline_tiles_path TEXT, active_stop_id TEXT)');
+          await db.insert('settings', {
+            'id': 1,
+            'offline_tiles_path': null,
+            'active_stop_id': null,
+          });
+        } else {
+          // ensure settings table has active_stop_id column
+          await db.execute('ALTER TABLE settings ADD COLUMN active_stop_id TEXT');
         }
       },
     );
